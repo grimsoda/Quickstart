@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "types": ["react", "react-native"],
+    "baseUrl": ".",
+    "paths": {
+      "@quickstart/shared": ["../../packages/shared/src"],
+      "@quickstart/storage": ["../../packages/storage/src"]
+    }
+  },
+  "include": ["app/**/*", "data/**/*", "components/**/*", "widgets/**/*", "index.ts"],
+  "exclude": ["node_modules"]
+}
