@@ -32,11 +32,13 @@ jobs:
       - name: Build unsigned app
         working-directory: apps/mobile
         run: |
+          xcodebuild -list -workspace ios/Quickstart.xcworkspace
           xcodebuild \
             -workspace ios/Quickstart.xcworkspace \
             -scheme Quickstart \
             -configuration Release \
             -sdk iphoneos \
+            -destination "generic/platform=iOS" \
             -derivedDataPath build/DerivedData \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
@@ -46,8 +48,13 @@ jobs:
       - name: Package unsigned IPA
         working-directory: apps/mobile
         run: |
+          APP_PATH=$(find build/DerivedData/Build/Products -name "*.app" -maxdepth 3 | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "No .app found in DerivedData"
+            exit 1
+          fi
           mkdir -p build/Payload
-          cp -R build/DerivedData/Build/Products/Release-iphoneos/Quickstart.app build/Payload/
+          cp -R "$APP_PATH" build/Payload/
           cd build
           zip -r quickstart-unsigned.ipa Payload
 
