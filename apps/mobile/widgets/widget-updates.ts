@@ -1,18 +1,13 @@
 import type { MenuItem } from "@quickstart/shared";
-import { updateWidgetSnapshot } from "expo-widgets";
-import { QuickstartWidget } from "./QuickstartWidget";
+import { ExtensionStorage } from "@bacons/apple-targets";
+import { generateWidgetSnapshot } from "./widget-snapshot";
 
-const pickTop = (items: MenuItem[], mode: MenuItem["mode"]) =>
-  items.find((item) => item.mode === mode);
+export { generateWidgetSnapshot } from "./widget-snapshot";
 
 export const updateQuickstartWidget = (items: MenuItem[]) => {
-  updateWidgetSnapshot(
-    "QuickstartWidget",
-    QuickstartWidget,
-    {
-      topDo: pickTop(items, "do"),
-      topDecide: pickTop(items, "decide"),
-      topDrift: pickTop(items, "drift"),
-    },
-  );
+  const storage = new ExtensionStorage("group.com.quickstart.app");
+  
+  const snapshot = generateWidgetSnapshot(items);
+  
+  storage.set("widgetSnapshot", JSON.stringify(snapshot));
 };
