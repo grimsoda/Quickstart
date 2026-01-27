@@ -13,7 +13,13 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.quickstart.app"
+      "bundleIdentifier": "com.quickstart.app",
+      "deploymentTarget": "17.0",
+      "entitlements": {
+        "com.apple.security.application-groups": [
+          "group.com.quickstart.app"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -28,19 +34,7 @@
     },
     "plugins": [
       "expo-router",
-      [
-        "expo-widgets",
-        {
-          "widgets": [
-            {
-              "name": "QuickstartWidget",
-              "displayName": "Quickstart",
-              "description": "Do/Decide/Drift menu",
-              "supportedFamilies": ["systemSmall", "systemMedium"]
-            }
-          ]
-        }
-      ]
+      "@bacons/apple-targets"
     ]
   }
 }
