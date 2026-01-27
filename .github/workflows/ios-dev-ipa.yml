@@ -18,6 +18,7 @@ jobs:
       - name: Install dependencies
         run: |
           rm -rf node_modules bun.lock
+          rm -rf apps/mobile/node_modules apps/mobile/bun.lock
           bun install
 
       - name: Patch expo-modules-core Swift concurrency (SDK 54)
