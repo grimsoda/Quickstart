@@ -1,9 +1,13 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View, Platform } from "react-native";
 import { useEffect } from "react";
 import type { MenuItem, Mode } from "@quickstart/shared";
 import { selectMenuItems } from "@quickstart/storage";
 import { AppProvider, useAppContext } from "../data/app-context";
 import { updateQuickstartWidget } from "../widgets/widget-updates";
+
+console.log("[Quickstart App] File loaded - initialization starting");
+console.log("[Quickstart App] Platform:", Platform.OS);
+console.log("[Quickstart App] Environment:", __DEV__ ? "development" : "production");
 
 const ModeHeader = ({ mode, onSelect }: { mode: Mode; onSelect: (mode: Mode) => void }) => {
   const modes: Mode[] = ["do", "decide", "drift"];
@@ -47,8 +51,21 @@ const HomeContent = () => {
   const { mode, setMode, items, preferences, addSession } = useAppContext();
   const selection = selectMenuItems(items, mode, preferences);
 
+  console.log("[Quickstart App] HomeContent rendered");
+  console.log("[Quickstart App] Current mode:", mode);
+  console.log("[Quickstart App] Items count:", items.length);
+  console.log("[Quickstart App] Selection count:", selection.length);
+
   useEffect(() => {
-    updateQuickstartWidget(items);
+    console.log("[Quickstart App] Widget update triggered with items:", JSON.stringify(items.map(i => ({ id: i.id, title: i.title }))));
+    try {
+      updateQuickstartWidget(items);
+      console.log("[Quickstart App] Widget update completed successfully");
+    } catch (error) {
+      console.error("[Quickstart App] Widget update FAILED:", error);
+      console.error("[Quickstart App] Error details:", JSON.stringify(error, null, 2));
+      console.error("[Quickstart App] Error stack:", error instanceof Error ? error.stack : "No stack trace");
+    }
   }, [items]);
 
   const handleStart = (item: MenuItem) => {
@@ -78,6 +95,7 @@ const HomeContent = () => {
 };
 
 export default function HomeScreen() {
+  console.log("[Quickstart App] HomeScreen rendering - app launch starting");
   return (
     <AppProvider>
       <HomeContent />
