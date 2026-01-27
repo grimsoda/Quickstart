@@ -30,9 +30,13 @@ struct Provider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> ()) {
-        let entry = loadEntry()
-        // Refresh every 15 minutes or when app reloads widget
-        let nextUpdateDate = Calendar.current.date(byAdding: .minute, value: 15, to: Date())!
+        guard let calendar = Calendar.current else {
+            let entry = SimpleEntry(date: Date(), topDo: nil, topDecide: nil, topDrift: nil)
+            completion(entry)
+            return
+        }
+        
+        let nextUpdateDate = calendar.date(byAdding: .minute, value: 15, to: Date())!
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdateDate))
         completion(timeline)
     }
