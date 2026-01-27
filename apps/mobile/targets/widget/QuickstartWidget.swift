@@ -32,7 +32,8 @@ struct Provider: TimelineProvider {
     func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> ()) {
         guard let calendar = Calendar.current else {
             let entry = SimpleEntry(date: Date(), topDo: nil, topDecide: nil, topDrift: nil)
-            completion(entry)
+            let timeline = Timeline(entries: [entry], policy: .after(Date()))
+            completion(timeline)
             return
         }
         
