@@ -67,7 +67,7 @@ jobs:
 
       - name: Prebuild iOS project
         working-directory: apps/mobile
-        run: bunx expo prebuild --platform ios --clean --no-install
+        run: bunx expo prebuild --platform ios --clean
 
       - name: Patch Podfile for Swift concurrency
         working-directory: apps/mobile
