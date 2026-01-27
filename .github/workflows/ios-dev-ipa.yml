@@ -18,6 +18,38 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Patch expo-modules-core Swift annotations
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import glob
+
+          targets = [
+              "node_modules/.bun/expo-modules-core@*/node_modules/expo-modules-core/ios/Core/Views/SwiftUI/SwiftUIHostingView.swift",
+              "node_modules/.bun/expo-modules-core@*/node_modules/expo-modules-core/ios/Core/Views/ViewDefinition.swift",
+          ]
+
+          for pattern in targets:
+              for file_path in glob.glob(pattern):
+                  path = Path(file_path)
+                  text = path.read_text()
+                  updated = text
+                  updated = updated.replace(
+                      ": ExpoView, @MainActor AnyExpoSwiftUIHostingView",
+                      ": ExpoView, AnyExpoSwiftUIHostingView",
+                  )
+                  updated = updated.replace(
+                      "public final class HostingView",
+                      "@MainActor public final class HostingView",
+                  )
+                  updated = updated.replace(
+                      "extension UIView: @MainActor AnyArgument",
+                      "@MainActor extension UIView: AnyArgument",
+                  )
+                  if updated != text:
+                      path.write_text(updated)
+          PY
+
       - name: Prebuild iOS project
         working-directory: apps/mobile
         run: bunx expo prebuild --platform ios --clean --no-install
