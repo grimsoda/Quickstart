@@ -18,6 +18,50 @@ jobs:
       - name: Install dependencies
         run: bun install
 
+      - name: Patch expo-modules-core Swift concurrency (SDK 54)
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import glob
+          import re
+
+          # Find the expo-modules-core Swift file in .bun node_modules
+          matches = glob.glob("node_modules/.bun/expo-modules-core@*/node_modules/expo-modules-core/ios/AppDelegates/ExpoAppDelegateSubscriberManager.swift")
+          if not matches:
+              print("No expo-modules-core Swift file found in expected paths")
+              raise SystemExit(1)
+
+          swift_file = Path(matches[0])
+          text = swift_file.read_text()
+
+          # Check if already patched by looking for both @MainActor and @preconcurrency before the class
+          if re.search(r'@MainActor\s*@preconcurrency\s+(public\s+)?(final\s+)?class\s+ExpoAppDelegateSubscriberManager', text):
+              print("File already has @MainActor and @preconcurrency annotations - skipping patch")
+              raise SystemExit(0)
+
+          # Pattern to match class declaration with optional modifiers (public, final, etc.)
+          # Matches: class ExpoAppDelegateSubscriberManager {
+          # Matches: public class ExpoAppDelegateSubscriberManager {
+          # Matches: final class ExpoAppDelegateSubscriberManager {
+          # Matches: public final class ExpoAppDelegateSubscriberManager {
+          pattern = r'^(\s*)(public\s+)?(final\s+)?class\s+ExpoAppDelegateSubscriberManager\s*\{'
+
+          def add_annotations(match):
+              indent = match.group(1)
+              public_mod = match.group(2) or ''
+              final_mod = match.group(3) or ''
+              return f"{indent}@MainActor\n{indent}@preconcurrency\n{indent}{public_mod}{final_mod}class ExpoAppDelegateSubscriberManager {{"
+
+          new_text = re.sub(pattern, add_annotations, text, flags=re.MULTILINE)
+
+          if new_text == text:
+              print("WARNING: Pattern did not match - class declaration may have unexpected format")
+              raise SystemExit(1)
+
+          swift_file.write_text(new_text)
+          print(f"SUCCESS: Patched {swift_file} with @MainActor and @preconcurrency annotations")
+          PY
+
       - name: Prebuild iOS project
         working-directory: apps/mobile
         run: bunx expo prebuild --platform ios --clean --no-install
