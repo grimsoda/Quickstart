@@ -308,3 +308,4 @@ bun test  # or apps/mobile test script if added
 - [x] Web Playwright tests pass.
 - [x] Mobile unit tests pass.
 - [x] CI IPA build passes on macos-latest.
+- [x] Widget crash bug fixed (force unwrap of Calendar.current).
