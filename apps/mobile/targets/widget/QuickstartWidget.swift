@@ -30,13 +30,8 @@ struct Provider: TimelineProvider {
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> ()) {
-        guard let calendar = Calendar.current else {
-            let entry = SimpleEntry(date: Date(), topDo: nil, topDecide: nil, topDrift: nil)
-            let timeline = Timeline(entries: [entry], policy: .after(Date()))
-            completion(timeline)
-            return
-        }
-        
+        let entry = loadEntry()
+        let calendar = Calendar.current
         let nextUpdateDate = calendar.date(byAdding: .minute, value: 15, to: Date())!
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdateDate))
         completion(timeline)
