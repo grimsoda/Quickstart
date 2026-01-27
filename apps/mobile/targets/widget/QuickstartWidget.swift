@@ -1,5 +1,6 @@
 import WidgetKit
 import SwiftUI
+import os
 
 // MARK: - Data Models
 
@@ -19,41 +20,69 @@ struct Provider: TimelineProvider {
     // App Group ID must match the one in entitlements
     let suiteName = "group.com.quickstart.app"
     let snapshotKey = "widgetSnapshot"
+    private let logger = Logger(subsystem: "com.quickstart.app", category: "Widget")
 
     func placeholder(in context: Context) -> SimpleEntry {
-        SimpleEntry(date: Date(), topDo: nil, topDecide: nil, topDrift: nil)
+        logger.log("placeholder called - generating placeholder entry")
+        return SimpleEntry(date: Date(), topDo: nil, topDecide: nil, topDrift: nil)
     }
 
     func getSnapshot(in context: Context, completion: @escaping (SimpleEntry) -> ()) {
+        logger.log("getSnapshot called - loading entry for snapshot")
         let entry = loadEntry()
+        logger.log("getSnapshot - returning entry with topDo: \(entry.topDo?.title ?? "nil"), topDecide: \(entry.topDecide?.title ?? "nil"), topDrift: \(entry.topDrift?.title ?? "nil")")
         completion(entry)
     }
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<SimpleEntry>) -> ()) {
+        logger.log("getTimeline called - loading entry for timeline")
         let entry = loadEntry()
         let calendar = Calendar.current
-        let nextUpdateDate = calendar.date(byAdding: .minute, value: 15, to: Date())!
+        guard let nextUpdateDate = calendar.date(byAdding: .minute, value: 15, to: Date()) else {
+            logger.error("getTimeline - failed to calculate nextUpdateDate, using current date")
+            let timeline = Timeline(entries: [entry], policy: .atEnd)
+            completion(timeline)
+            return
+        }
+        logger.log("getTimeline - creating timeline with entry: topDo=\(entry.topDo?.title ?? "nil"), topDecide=\(entry.topDecide?.title ?? "nil"), topDrift=\(entry.topDrift?.title ?? "nil"), nextUpdate=\(nextUpdateDate)")
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdateDate))
         completion(timeline)
     }
 
     private func loadEntry() -> SimpleEntry {
-        guard let userDefaults = UserDefaults(suiteName: suiteName),
-              let jsonString = userDefaults.string(forKey: snapshotKey),
-              let data = jsonString.data(using: .utf8) else {
+        logger.log("loadEntry called - attempting to load data from UserDefaults")
+
+        guard let userDefaults = UserDefaults(suiteName: suiteName) else {
+            logger.error("loadEntry - failed to access UserDefaults with suite name: \(suiteName)")
+            return SimpleEntry(date: Date(), topDo: nil, topDecide: nil, topDrift: nil)
+        }
+        logger.log("loadEntry - successfully accessed UserDefaults")
+
+        guard let jsonString = userDefaults.string(forKey: snapshotKey) else {
+            logger.error("loadEntry - no data found in UserDefaults for key: \(snapshotKey)")
+            return SimpleEntry(date: Date(), topDo: nil, topDecide: nil, topDrift: nil)
+        }
+        logger.log("loadEntry - found JSON string in UserDefaults: \(jsonString.prefix(100))")
+
+        guard let data = jsonString.data(using: .utf8) else {
+            logger.error("loadEntry - failed to convert JSON string to UTF8 data")
             return SimpleEntry(date: Date(), topDo: nil, topDecide: nil, topDrift: nil)
         }
 
         do {
             let snapshot = try JSONDecoder().decode(WidgetSnapshot.self, from: data)
-            return SimpleEntry(
+            logger.log("loadEntry - successfully decoded JSON snapshot: topDo=\(snapshot.topDo?.title ?? "nil"), topDecide=\(snapshot.topDecide?.title ?? "nil"), topDrift=\(snapshot.topDrift?.title ?? "nil")")
+            let entry = SimpleEntry(
                 date: Date(),
                 topDo: snapshot.topDo,
                 topDecide: snapshot.topDecide,
                 topDrift: snapshot.topDrift
             )
+            logger.log("loadEntry - returning entry: topDo=\(entry.topDo?.title ?? "nil"), topDecide=\(entry.topDecide?.title ?? "nil"), topDrift=\(entry.topDrift?.title ?? "nil")")
+            return entry
         } catch {
-            print("Widget JSON decode error: \(error)")
+            logger.error("loadEntry - JSON decode error: \(error.localizedDescription)")
+            logger.error("loadEntry - full error details: \(String(describing: error))")
             return SimpleEntry(date: Date(), topDo: nil, topDecide: nil, topDrift: nil)
         }
     }
