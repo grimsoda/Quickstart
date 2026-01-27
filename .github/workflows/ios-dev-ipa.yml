@@ -39,12 +39,12 @@ jobs:
               print("File already has @MainActor and @preconcurrency annotations - skipping patch")
               raise SystemExit(0)
 
-          # Pattern to match class declaration with optional modifiers (public, final, etc.)
-          # Matches: class ExpoAppDelegateSubscriberManager {
-          # Matches: public class ExpoAppDelegateSubscriberManager {
-          # Matches: final class ExpoAppDelegateSubscriberManager {
-          # Matches: public final class ExpoAppDelegateSubscriberManager {
-          pattern = r'^(\s*)(public\s+)?(final\s+)?class\s+ExpoAppDelegateSubscriberManager\s*\{'
+          # Pattern to match class declaration with optional modifiers and inheritance
+          # Matches: class ExpoAppDelegateSubscriberManager: NSObject {
+          # Matches: public class ExpoAppDelegateSubscriberManager: NSObject {
+          # Matches: final class ExpoAppDelegateSubscriberManager: NSObject {
+          # Matches: public final class ExpoAppDelegateSubscriberManager: NSObject {
+          pattern = r'^(\s*)(public\s+)?(final\s+)?class\s+ExpoAppDelegateSubscriberManager\b[^{]*\{'
 
           def add_annotations(match):
               indent = match.group(1)
