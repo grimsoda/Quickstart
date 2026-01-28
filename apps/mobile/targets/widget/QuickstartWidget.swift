@@ -106,6 +106,7 @@ struct ItemLine: View {
             Text(label)
                 .font(.body)
                 .foregroundStyle(.primary)
+                .lineLimit(1)
             Text(title ?? "Add item")
                 // #6b7280 is (107, 114, 128)
                 .foregroundStyle(Color(red: 107/255, green: 114/255, blue: 128/255))
