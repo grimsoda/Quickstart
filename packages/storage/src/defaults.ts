@@ -1,9 +1,10 @@
 import type { MenuItem, Preference, Rule, Session } from "@quickstart/shared";
+import { uuid } from './uuid';
 
 const now = () => new Date().toISOString();
 
 const baseItem = (overrides: Partial<MenuItem>): MenuItem => ({
-  id: crypto.randomUUID(),
+  id: uuid(),
   mode: "do",
   title: "",
   startStep: "",
@@ -78,7 +79,7 @@ export const defaultItems: MenuItem[] = [
 
 export const defaultRules: Rule[] = [
   {
-    id: crypto.randomUUID(),
+    id: uuid(),
     trigger: "new_tab",
     conditions: {},
     action: "show_mode",

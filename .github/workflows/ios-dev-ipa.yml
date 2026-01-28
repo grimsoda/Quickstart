@@ -16,43 +16,58 @@ jobs:
           bun-version: "1.3.5"
 
       - name: Install dependencies
-        run: bun install
+        run: |
+          rm -rf node_modules node_modules/.bun bun.lock
+          rm -rf apps/mobile/node_modules apps/mobile/bun.lock
+          bun install
 
-      - name: Patch expo-modules-core Swift annotations
+      - name: Patch expo-modules-core Swift concurrency (SDK 54)
         run: |
           python - <<'PY'
           from pathlib import Path
           import glob
+          import re
 
-          targets = [
-              "node_modules/.bun/expo-modules-core@*/node_modules/expo-modules-core/ios/Core/Views/SwiftUI/SwiftUIHostingView.swift",
-              "node_modules/.bun/expo-modules-core@*/node_modules/expo-modules-core/ios/Core/Views/ViewDefinition.swift",
-          ]
+          # Find the expo-modules-core Swift file in .bun node_modules
+          matches = glob.glob("node_modules/.bun/expo-modules-core@*/node_modules/expo-modules-core/ios/AppDelegates/ExpoAppDelegateSubscriberManager.swift")
+          if not matches:
+              print("No expo-modules-core Swift file found in expected paths")
+              raise SystemExit(1)
 
-          for pattern in targets:
-              for file_path in glob.glob(pattern):
-                  path = Path(file_path)
-                  text = path.read_text()
-                  updated = text
-                  updated = updated.replace(
-                      ": ExpoView, @MainActor AnyExpoSwiftUIHostingView",
-                      ": ExpoView, AnyExpoSwiftUIHostingView",
-                  )
-                  updated = updated.replace(
-                      "public final class HostingView",
-                      "@MainActor public final class HostingView",
-                  )
-                  updated = updated.replace(
-                      "extension UIView: @MainActor AnyArgument",
-                      "@MainActor extension UIView: AnyArgument",
-                  )
-                  if updated != text:
-                      path.write_text(updated)
+          swift_file = Path(matches[0])
+          text = swift_file.read_text()
+
+          # Check if already patched by looking for both @MainActor and @preconcurrency before the class
+          if re.search(r'@MainActor\s*@preconcurrency\s+(public\s+)?(final\s+)?class\s+ExpoAppDelegateSubscriberManager', text):
+              print("File already has @MainActor and @preconcurrency annotations - skipping patch")
+              raise SystemExit(0)
+
+          # Pattern to match class declaration with optional modifiers and inheritance
+          # Matches: class ExpoAppDelegateSubscriberManager: NSObject {
+          # Matches: public class ExpoAppDelegateSubscriberManager: NSObject {
+          # Matches: final class ExpoAppDelegateSubscriberManager: NSObject {
+          # Matches: public final class ExpoAppDelegateSubscriberManager: NSObject {
+          pattern = r'^(\s*)(public\s+)?(final\s+)?class\s+ExpoAppDelegateSubscriberManager\b[^{]*\{'
+
+          def add_annotations(match):
+              indent = match.group(1)
+              public_mod = match.group(2) or ''
+              final_mod = match.group(3) or ''
+              return f"{indent}@MainActor\n{indent}@preconcurrency\n{indent}{public_mod}{final_mod}class ExpoAppDelegateSubscriberManager {{"
+
+          new_text = re.sub(pattern, add_annotations, text, flags=re.MULTILINE)
+
+          if new_text == text:
+              print("WARNING: Pattern did not match - class declaration may have unexpected format")
+              raise SystemExit(1)
+
+          swift_file.write_text(new_text)
+          print(f"SUCCESS: Patched {swift_file} with @MainActor and @preconcurrency annotations")
           PY
 
       - name: Prebuild iOS project
         working-directory: apps/mobile
-        run: bunx expo prebuild --platform ios --clean --no-install
+        run: bunx expo prebuild --platform ios --clean
 
       - name: Patch Podfile for Swift concurrency
         working-directory: apps/mobile
