@@ -27,8 +27,21 @@ report.[0-9]_.[0-9]_.[0-9]_.[0-9]_.json
 .cache
 *.tsbuildinfo
 
+# build artifacts (generated files)
+apps/mobile/targets/widget/Info.plist
+apps/mobile/targets/widget/generated.entitlements
+ 
 # IntelliJ based IDEs
 .idea
+
+# temporary files
+tmp/
+
+# Sisyphus workflow state
+.sisyphus/
+ 
+# crash debugging guide
+CRASH_DEBUGGING_GUIDE.md
 
 # Finder (MacOS) folder config
 .DS_Store
