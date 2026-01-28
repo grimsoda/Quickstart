@@ -7,6 +7,7 @@ import { loadSnapshot, saveSnapshot } from "./storage";
 type AppState = StorageSnapshot & {
   mode: Mode;
   activeDecisionId?: string;
+  categories: string[];
 };
 
 type AppActions = {
@@ -18,6 +19,8 @@ type AppActions = {
   addSession: (session: Session) => void;
   updatePreferences: (preferences: Preference) => void;
   replaceSnapshot: (snapshot: StorageSnapshot) => void;
+  updateCategories: (categories: string[]) => void;
+  deleteCategory: (categoryName: string) => void;
 };
 
 const AppContext = createContext<(AppState & AppActions) | null>(null);
@@ -28,6 +31,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [snapshot, setSnapshot] = useState<StorageSnapshot>(initialSnapshot);
   const [mode, setMode] = useState<Mode>("do");
   const [activeDecisionId, setActiveDecisionId] = useState<string | undefined>();
+  const [categories, setCategories] = useState<string[]>([]);
 
   const persist = (next: StorageSnapshot) => {
     setSnapshot(next);
@@ -64,8 +68,20 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       replaceSnapshot: (next) => {
         persist(next);
       },
+      updateCategories: (newCategories: string[]) => {
+        setCategories(newCategories);
+      },
+      deleteCategory: (categoryName: string) => {
+        setCategories(categories.filter((cat) => cat !== categoryName));
+        persist({
+          ...snapshot,
+          items: snapshot.items.map((item) =>
+            item.category === categoryName ? { ...item, category: null } : item,
+          ),
+        });
+      },
     }),
-    [snapshot],
+    [snapshot, categories],
   );
 
   const value = useMemo(
@@ -73,9 +89,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       ...snapshot,
       mode,
       activeDecisionId,
+      categories,
       ...actions,
     }),
-    [actions, activeDecisionId, mode, snapshot],
+    [actions, activeDecisionId, categories, mode, snapshot],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

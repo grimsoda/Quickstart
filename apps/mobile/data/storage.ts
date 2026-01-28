@@ -26,3 +26,32 @@ export const loadSnapshot = (): StorageSnapshot => {
 export const saveSnapshot = (snapshot: StorageSnapshot) => {
   memorySnapshot = snapshot;
 };
+
+export type ThemeMode = "light" | "dark" | "system";
+
+const THEME_PREFERENCE_KEY = "@theme_preference";
+
+export const loadThemePreference = async (): Promise<ThemeMode | null> => {
+  const AsyncStorage = await import("@react-native-async-storage/async-storage");
+  const value = await AsyncStorage.default.getItem(THEME_PREFERENCE_KEY);
+  return value as ThemeMode | null;
+};
+
+export const saveThemePreference = async (mode: ThemeMode): Promise<void> => {
+  const AsyncStorage = await import("@react-native-async-storage/async-storage");
+  await AsyncStorage.default.setItem(THEME_PREFERENCE_KEY, mode);
+};
+
+export const getEffectiveTheme = async (systemTheme?: "light" | "dark"): Promise<"light" | "dark"> => {
+  const savedMode = await loadThemePreference();
+  
+  if (savedMode === null) {
+    return systemTheme ?? "light";
+  }
+  
+  if (savedMode === "system") {
+    return systemTheme ?? "light";
+  }
+  
+  return savedMode;
+};

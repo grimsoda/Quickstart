@@ -10,7 +10,7 @@ export type MenuItem = {
   title: string;
   startStep: string;
   durationBucket: DurationBucket;
-  category: MenuCategory;
+  category: MenuCategory | null;
   tags: string[];
   frictionScore: number;
   enabled: boolean;

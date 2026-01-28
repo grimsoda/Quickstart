@@ -1,0 +1,246 @@
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { useMemo, useState } from "react";
+import { useLocalSearchParams, router } from "expo-router";
+import type { MenuItem, Mode } from "@quickstart/shared";
+import { useAppContext } from "../../data/app-context";
+import { useThemeContext } from "../../data/theme-context";
+
+const durationBuckets: MenuItem["durationBucket"][] = ["2m", "10m", "25m"];
+const modes: Mode[] = ["do", "decide", "drift"];
+
+const cycleValue = <T,>(values: T[], current: T) => {
+  const index = values.indexOf(current);
+  return values[(index + 1) % values.length] ?? values[0];
+};
+
+const ItemDetailContent = () => {
+  const { theme } = useThemeContext();
+  const { items, updateItem } = useAppContext();
+  const { id } = useLocalSearchParams<{ id: string }>();
+
+  const item = items.find((i: MenuItem) => i.id === id);
+  const [localItem, setLocalItem] = useState<MenuItem | null>(item || null);
+
+  const handleSave = () => {
+    if (localItem) {
+      updateItem(localItem);
+      router.back();
+    }
+  };
+
+  const handleCancel = () => {
+    router.back();
+  };
+
+  const styles = useMemo(
+    () =>
+      StyleSheet.create({
+        container: {
+          padding: 24,
+          gap: 16,
+          backgroundColor: theme.colors.background,
+        },
+        title: {
+          fontSize: 24,
+          fontWeight: "700",
+          color: theme.colors.text,
+        },
+        card: {
+          borderRadius: 16,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          backgroundColor: theme.colors.card,
+          padding: 16,
+          gap: 16,
+        },
+        label: {
+          fontSize: 14,
+          fontWeight: "600",
+          color: theme.colors.text,
+          marginBottom: 4,
+        },
+        input: {
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          borderRadius: 10,
+          paddingVertical: 8,
+          paddingHorizontal: 12,
+          color: theme.colors.text,
+        },
+        row: {
+          flexDirection: "row",
+          gap: 8,
+          flexWrap: "wrap",
+        },
+        chip: {
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          borderRadius: 999,
+          paddingVertical: 6,
+          paddingHorizontal: 12,
+        },
+        chipText: {
+          color: theme.colors.text,
+          fontSize: 12,
+        },
+        buttonRow: {
+          flexDirection: "row",
+          gap: 12,
+          marginTop: 8,
+        },
+        saveButton: {
+          flex: 1,
+          backgroundColor: theme.colors.text,
+          paddingVertical: 10,
+          borderRadius: 12,
+          alignItems: "center",
+        },
+        saveButtonText: {
+          color: theme.colors.background,
+          fontWeight: "600",
+        },
+        cancelButton: {
+          flex: 1,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          paddingVertical: 10,
+          borderRadius: 12,
+          alignItems: "center",
+        },
+        cancelButtonText: {
+          color: theme.colors.text,
+          fontWeight: "600",
+        },
+      }),
+    [theme],
+  );
+
+  if (!item) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Item not found</Text>
+      </View>
+    );
+  }
+
+  return (
+    <ScrollView contentContainerStyle={styles.container}>
+      <Text style={styles.title}>Edit Item</Text>
+      <View style={styles.card}>
+        <View>
+          <Text style={styles.label}>Title</Text>
+          <TextInput
+            value={localItem?.title || ""}
+            placeholder="Title"
+            placeholderTextColor={theme.colors.text}
+            onChangeText={(text) =>
+              setLocalItem((prev) => (prev ? { ...prev, title: text } : null))
+            }
+            style={styles.input}
+          />
+        </View>
+
+        <View>
+          <Text style={styles.label}>Description</Text>
+          <TextInput
+            value={localItem?.startStep || ""}
+            placeholder="Description"
+            placeholderTextColor={theme.colors.text}
+            onChangeText={(text) =>
+              setLocalItem((prev) => (prev ? { ...prev, startStep: text } : null))
+            }
+            style={styles.input}
+            multiline
+          />
+        </View>
+
+        <View>
+          <Text style={styles.label}>Duration</Text>
+          <View style={styles.row}>
+            <Pressable
+              style={styles.chip}
+              onPress={() =>
+                setLocalItem((prev) =>
+                  prev
+                    ? {
+                        ...prev,
+                        durationBucket: cycleValue(durationBuckets, prev.durationBucket) as MenuItem["durationBucket"],
+                      }
+                    : null
+                )
+              }
+            >
+              <Text style={styles.chipText}>Duration: {localItem?.durationBucket}</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <View>
+          <Text style={styles.label}>Category</Text>
+          <TextInput
+            value={localItem?.category || ""}
+            placeholder="Category"
+            placeholderTextColor={theme.colors.text}
+            onChangeText={(text) =>
+              setLocalItem((prev) =>
+                prev ? { ...prev, category: text as MenuItem["category"] } : null
+              )
+            }
+            style={styles.input}
+          />
+        </View>
+
+        <View>
+          <Text style={styles.label}>Mode</Text>
+          <View style={styles.row}>
+            <Pressable
+              style={styles.chip}
+              onPress={() =>
+                setLocalItem((prev) =>
+                  prev
+                    ? { ...prev, mode: cycleValue(modes, prev.mode) as Mode }
+                    : null
+                )
+              }
+            >
+              <Text style={styles.chipText}>Mode: {localItem?.mode}</Text>
+            </Pressable>
+          </View>
+        </View>
+
+        <View>
+          <Text style={styles.label}>Tags</Text>
+          <TextInput
+            value={localItem?.tags.join(", ") || ""}
+            placeholder="Tags (comma-separated)"
+            placeholderTextColor={theme.colors.text}
+            onChangeText={(text) =>
+              setLocalItem((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      tags: text.split(",").map((tag) => tag.trim()).filter(Boolean),
+                    }
+                  : null
+              )
+            }
+            style={styles.input}
+          />
+        </View>
+
+        <View style={styles.buttonRow}>
+          <Pressable onPress={handleSave} style={styles.saveButton}>
+            <Text style={styles.saveButtonText}>Save</Text>
+          </Pressable>
+          <Pressable onPress={handleCancel} style={styles.cancelButton}>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </Pressable>
+        </View>
+      </View>
+    </ScrollView>
+  );
+};
+
+export default function ItemDetailScreen() {
+  return <ItemDetailContent />;
+}

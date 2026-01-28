@@ -104,11 +104,12 @@ struct ItemLine: View {
     var body: some View {
         HStack(spacing: 6) {
             Text(label)
-                .font(.body)
+                .font(.caption)
                 .foregroundStyle(.primary)
                 .lineLimit(1)
             Text(title ?? "Add item")
                 // #6b7280 is (107, 114, 128)
+                .font(.caption)
                 .foregroundStyle(Color(red: 107/255, green: 114/255, blue: 128/255))
                 .lineLimit(1)
         }
@@ -121,24 +122,23 @@ struct QuickstartWidgetEntryView : View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Quickstart")
-                .font(.headline)
-                .foregroundStyle(.primary)
-
             if family == .systemSmall {
-                // Parity with JS: Small widget shows Do and Tomorrow (mapped to topDecide)
+                // Small widget shows Do, Decide, Drift in compact 3-row layout
+                Spacer()
                 ItemLine(label: "Do", title: entry.topDo?.title)
-                ItemLine(label: "Tomorrow", title: entry.topDecide?.title)
+                ItemLine(label: "Decide", title: entry.topDecide?.title)
+                ItemLine(label: "Drift", title: entry.topDrift?.title)
             } else {
-                // Parity with JS: Medium widget shows Do, Decide, Drift
+                // Medium widget shows Do, Decide, Drift
                 ItemLine(label: "Do", title: entry.topDo?.title)
                 ItemLine(label: "Decide", title: entry.topDecide?.title)
                 ItemLine(label: "Drift", title: entry.topDrift?.title)
             }
-            
+
             Spacer()
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
         .containerBackground(.fill.tertiary, for: .widget)
     }
 }

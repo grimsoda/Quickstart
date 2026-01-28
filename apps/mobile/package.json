@@ -13,10 +13,13 @@
     "@bacons/apple-targets": "^3.0.7",
     "@quickstart/shared": "*",
     "@quickstart/storage": "*",
+    "@react-navigation/native": "^7.1.28",
     "expo": "~54.0.0",
     "expo-constants": "~18.0.13",
+    "expo-document-picker": "^14.0.8",
     "expo-linking": "~8.0.11",
     "expo-router": "~6.0.22",
+    "expo-sharing": "^14.0.8",
     "expo-status-bar": "~3.0.9",
     "react": "19.1.0",
     "react-native": "0.81.5",
@@ -25,6 +28,8 @@
   },
   "devDependencies": {
     "@expo/config-plugins": "~10.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/react-native": "^13.3.3",
     "@types/react": "~19.1.10",
     "typescript": "~5.9.2"
   },

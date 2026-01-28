@@ -102,11 +102,11 @@ export const EditorPage = () => {
               <label style={{ display: "grid", gap: "0.25rem" }}>
                 <span style={{ fontSize: "0.75rem", color: "#6b7280" }}>Category</span>
                 <select
-                  value={item.category}
+                  value={item.category || ""}
                   onChange={(event) =>
                     updateItem({
                       ...item,
-                      category: event.target.value as MenuCategory,
+                      category: (event.target.value as any) as MenuCategory | null,
                       updatedAt: new Date().toISOString(),
                     })
                   }
