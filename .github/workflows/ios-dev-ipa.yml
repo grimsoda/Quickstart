@@ -120,6 +120,7 @@ jobs:
         run: pod install --project-directory=ios
 
       - name: Build unsigned app
+|      xcodebuild \
         working-directory: apps/mobile
         run: |
           xcodebuild -list -workspace ios/Quickstart.xcworkspace
