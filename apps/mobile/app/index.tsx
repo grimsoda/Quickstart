@@ -52,7 +52,7 @@ const MenuList = ({ items, router, styles }: { items: MenuItem[]; router: Return
 
 const HomeContent = () => {
   const { theme } = useThemeContext();
-  const { mode, setMode, items, preferences, addSession } = useAppContext();
+  const { mode, setMode, items, preferences, addSession, addItem } = useAppContext();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const selection = selectMenuItems(items, mode, preferences);
@@ -69,20 +69,6 @@ const HomeContent = () => {
           paddingTop: insets.top,
           gap: 16,
         },
-        title: {
-          fontSize: 28,
-          fontWeight: "700",
-          color: theme.colors.text,
-        },
-        sectionTitle: {
-          fontSize: 18,
-          fontWeight: "600",
-          color: theme.colors.text,
-        },
-        // ... other existing styles
-      },
-      }),
-    [theme, insets]);
         title: {
           fontSize: 28,
           fontWeight: "700",
@@ -185,6 +171,24 @@ const HomeContent = () => {
     [theme, insets],
   );
 
+  const handleAddItem = () => {
+    const newItem: MenuItem = {
+      id: `item-${Date.now()}`,
+      mode: "do" as Mode,
+      title: "",
+      startStep: "",
+      durationBucket: "2m" as MenuItem["durationBucket"],
+      category: null,
+      tags: [],
+      frictionScore: 1,
+      enabled: true,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    addItem(newItem);
+    router.push(`/item/${newItem.id}`);
+  };
+
   console.log("[Quickstart App] HomeContent rendered");
   console.log("[Quickstart App] Current mode:", mode);
   console.log("[Quickstart App] Items count:", items.length);
@@ -208,6 +212,9 @@ const HomeContent = () => {
       <Text style={styles.subtitle}>Do · Decide · Drift</Text>
       <View style={styles.headerRow}>
         <ModeHeader mode={mode} onSelect={setMode} styles={styles} />
+        <Pressable onPress={handleAddItem} style={styles.settingsButton}>
+          <Text style={styles.settingsText}>+ Add</Text>
+        </Pressable>
         <Pressable onPress={() => router.push("/settings")} style={styles.settingsButton}>
           <Text style={styles.settingsText}>Settings</Text>
         </Pressable>
