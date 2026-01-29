@@ -13,7 +13,7 @@ type SettingsSection = {
   data: any[];
 };
 
-type OrderingPreference = "friction" | "duration" | "recent";
+type OrderingPreference = "duration" | "recent";
 
 const CategoryList = ({ items, categories, styles, theme, updateCategories, deleteCategory }: { items: any[]; categories: string[]; styles: ReturnType<typeof StyleSheet.create>; theme: any; updateCategories: (categories: string[]) => void; deleteCategory: (categoryName: string) => void }) => {
   const [newCategory, setNewCategory] = useState("");
@@ -324,7 +324,7 @@ const SettingsContent = () => {
   };
 
   const themeModes: ThemeMode[] = ["light", "dark", "system"];
-  const orderingOptions: OrderingPreference[] = ["friction", "duration", "recent"];
+  const orderingOptions: OrderingPreference[] = ["duration", "recent"];
 
   const sections: SettingsSection[] = [
     {

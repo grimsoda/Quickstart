@@ -94,7 +94,7 @@ export const defaultPreferences: Preference = {
     decideMax: 3,
     driftMax: 3,
   },
-  ordering: "friction",
+  ordering: "duration",
   widgetConfig: {
     smallWidgetMode: "do",
     mediumWidgetModes: ["do", "decide", "drift"],

@@ -47,7 +47,7 @@ export type Preference = {
     decideMax: number;
     driftMax: number;
   };
-  ordering: "friction" | "duration" | "recent";
+  ordering: "duration" | "recent";
   widgetConfig: {
     smallWidgetMode: Mode;
     mediumWidgetModes: Mode[];

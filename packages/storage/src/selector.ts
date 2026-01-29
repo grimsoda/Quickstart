@@ -12,7 +12,7 @@ const orderItems = (items: MenuItem[], preference: Preference) => {
     );
   }
 
-  return [...items].sort((a, b) => a.frictionScore - b.frictionScore);
+  return [...items].sort((a, b) => order[a.durationBucket] - order[b.durationBucket]);
 };
 
 const applyBlocklists = (items: MenuItem[], preference: Preference) => {
