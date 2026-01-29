@@ -222,18 +222,21 @@ const ItemDetailContent = () => {
         <View>
           <Text style={styles.label}>Mode</Text>
           <View style={styles.row}>
-            <Pressable
-              style={styles.chip}
-              onPress={() =>
+            <Picker
+              selectedValue={localItem?.mode}
+              onValueChange={(value) =>
                 setLocalItem((prev) =>
                   prev
-                    ? { ...prev, mode: cycleValue(modes, prev.mode) as Mode }
+                    ? { ...prev, mode: value as Mode }
                     : null
                 )
               }
+              style={styles.picker}
             >
-              <Text style={styles.chipText}>Mode: {localItem?.mode}</Text>
-            </Pressable>
+              <Picker.Item label="Do" value="do" />
+              <Picker.Item label="Decide" value="decide" />
+              <Picker.Item label="Drift" value="drift" />
+            </Picker>
           </View>
         </View>
 
