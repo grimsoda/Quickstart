@@ -1,4 +1,4 @@
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useMemo, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
@@ -17,7 +17,7 @@ const cycleValue = <T,>(values: T[], current: T) => {
 
 const ItemDetailContent = () => {
   const { theme } = useThemeContext();
-  const { items, updateItem } = useAppContext();
+  const { items, updateItem, deleteItem } = useAppContext();
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
 
@@ -33,6 +33,29 @@ const ItemDetailContent = () => {
 
   const handleCancel = () => {
     router.back();
+  };
+
+  const handleDelete = () => {
+    if (localItem) {
+      Alert.alert(
+        "Delete Item",
+        "Are you sure you want to delete this item?",
+        [
+          {
+            text: "Cancel",
+            style: "cancel",
+          },
+          {
+            text: "Delete",
+            style: "destructive",
+            onPress: () => {
+              deleteItem(localItem.id);
+              router.back();
+            },
+          },
+        ]
+      );
+    }
   };
 
   const styles = useMemo(
@@ -90,21 +113,6 @@ const ItemDetailContent = () => {
           paddingVertical: 6,
           paddingHorizontal: 12,
         },
-        picker: {
-          backgroundColor: theme.colors.card,
-          borderWidth: 1,
-          borderColor: theme.colors.border,
-          borderRadius: 8,
-          paddingVertical: 6,
-          paddingHorizontal: 12,
-        },
-        chip: {
-          borderWidth: 1,
-          borderColor: theme.colors.border,
-          borderRadius: 999,
-          paddingVertical: 6,
-          paddingHorizontal: 12,
-        },
         chipText: {
           color: theme.colors.text,
           fontSize: 12,
@@ -135,6 +143,18 @@ const ItemDetailContent = () => {
         },
         cancelButtonText: {
           color: theme.colors.text,
+          fontWeight: "600",
+        },
+        deleteButton: {
+          flex: 1,
+          borderWidth: 1,
+          borderColor: "#ef4444",
+          paddingVertical: 10,
+          borderRadius: 12,
+          alignItems: "center",
+        },
+        deleteButtonText: {
+          color: "#ef4444",
           fontWeight: "600",
         },
       }),
@@ -263,6 +283,9 @@ const ItemDetailContent = () => {
         <View style={styles.buttonRow}>
           <Pressable onPress={handleSave} style={styles.saveButton}>
             <Text style={styles.saveButtonText}>Save</Text>
+          </Pressable>
+          <Pressable onPress={handleDelete} style={styles.deleteButton}>
+            <Text style={styles.deleteButtonText}>Delete</Text>
           </Pressable>
           <Pressable onPress={handleCancel} style={styles.cancelButton}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
