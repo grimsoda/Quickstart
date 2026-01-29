@@ -36,7 +36,17 @@
     },
     "plugins": [
       "expo-router",
-      "@bacons/apple-targets"
+      "@bacons/apple-targets",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "ios.swiftConcurrencyFlags": {
+              "SWIFT_STRICT_CONCURRENCY": "minimal"
+            }
+          }
+        }
+      ]
     ]
   }
 }
