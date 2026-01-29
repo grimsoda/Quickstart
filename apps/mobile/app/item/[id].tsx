@@ -5,6 +5,7 @@ import { useLocalSearchParams, router } from "expo-router";
 import type { MenuItem, Mode } from "@quickstart/shared";
 import { useAppContext } from "../../data/app-context";
 import { useThemeContext } from "../../data/theme-context";
+import { Picker } from "@react-native-picker/picker";
 
 const durationBuckets: MenuItem["durationBucket"][] = ["2m", "10m", "25m"];
 const modes: Mode[] = ["do", "decide", "drift"];
@@ -73,7 +74,29 @@ const ItemDetailContent = () => {
         row: {
           flexDirection: "row",
           gap: 8,
-          flexWrap: "wrap",
+        },
+        chip: {
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          borderRadius: 999,
+          paddingVertical: 6,
+          paddingHorizontal: 12,
+        },
+        picker: {
+          backgroundColor: theme.colors.card,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          borderRadius: 8,
+          paddingVertical: 6,
+          paddingHorizontal: 12,
+        },
+        picker: {
+          backgroundColor: theme.colors.card,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          borderRadius: 8,
+          paddingVertical: 6,
+          paddingHorizontal: 12,
         },
         chip: {
           borderWidth: 1,
@@ -160,21 +183,24 @@ const ItemDetailContent = () => {
         <View>
           <Text style={styles.label}>Duration</Text>
           <View style={styles.row}>
-            <Pressable
-              style={styles.chip}
-              onPress={() =>
+            <Picker
+              selectedValue={localItem?.durationBucket}
+              onValueChange={(value) =>
                 setLocalItem((prev) =>
                   prev
                     ? {
                         ...prev,
-                        durationBucket: cycleValue(durationBuckets, prev.durationBucket) as MenuItem["durationBucket"],
+                        durationBucket: value as MenuItem["durationBucket"],
                       }
                     : null
                 )
               }
+              style={styles.picker}
             >
-              <Text style={styles.chipText}>Duration: {localItem?.durationBucket}</Text>
-            </Pressable>
+              <Picker.Item label="2 minutes" value="2m" />
+              <Picker.Item label="10 minutes" value="10m" />
+              <Picker.Item label="25 minutes" value="25m" />
+            </Picker>
           </View>
         </View>
 
