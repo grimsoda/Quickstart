@@ -455,7 +455,7 @@ const SettingsContent = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Settings</Text>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView>
         {sections.map((section) => (
           <View key={section.title}>
             <Text style={styles.sectionHeader}>{section.title}</Text>
