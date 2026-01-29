@@ -9,7 +9,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider>
         <AppProvider>
-          <StatusBar style="dark" />
+          <StatusBar style="auto" />
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="index" />
             <Stack.Screen name="editor" />
