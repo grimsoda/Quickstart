@@ -207,25 +207,27 @@ const HomeContent = () => {
   }, [items]);
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
       <Text style={styles.title}>Quickstart</Text>
       <Text style={styles.subtitle}>Do · Decide · Drift</Text>
-      <View style={styles.headerRow}>
-        <ModeHeader mode={mode} onSelect={setMode} styles={styles} />
-        <Pressable onPress={handleAddItem} style={styles.settingsButton}>
-          <Text style={styles.settingsText}>+ Add</Text>
-        </Pressable>
-        <Pressable onPress={() => router.push("/settings")} style={styles.settingsButton}>
-          <Text style={styles.settingsText}>Settings</Text>
-        </Pressable>
-      </View>
-      <Text style={styles.sectionTitle}>Menu</Text>
-      {selection.length === 0 ? (
-        <Text style={styles.emptyState}>Add items from the web editor to get started.</Text>
-      ) : (
-        <MenuList items={selection} router={router} styles={styles} />
-      )}
-    </ScrollView>
+      <ScrollView>
+        <View style={styles.headerRow}>
+          <ModeHeader mode={mode} onSelect={setMode} styles={styles} />
+          <Pressable onPress={handleAddItem} style={styles.settingsButton}>
+            <Text style={styles.settingsText}>+ Add</Text>
+          </Pressable>
+          <Pressable onPress={() => router.push("/settings")} style={styles.settingsButton}>
+            <Text style={styles.settingsText}>Settings</Text>
+          </Pressable>
+        </View>
+        <Text style={styles.sectionTitle}>Menu</Text>
+        {selection.length === 0 ? (
+          <Text style={styles.emptyState}>Add items from the web editor to get started.</Text>
+        ) : (
+          <MenuList items={selection} router={router} styles={styles} />
+        )}
+      </ScrollView>
+    </View>
   );
 };
 
