@@ -1,5 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useMemo } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { MenuCategory, MenuItem, Mode } from "@quickstart/shared";
 import { useAppContext } from "../data/app-context";
 import { useThemeContext } from "../data/theme-context";
@@ -11,6 +12,7 @@ const buckets: MenuItem["durationBucket"][] = ["2m", "10m", "25m"];
 const EditorContent = () => {
   const { theme } = useThemeContext();
   const { items, addItem, updateItem, deleteItem } = useAppContext();
+  const insets = useSafeAreaInsets();
 
   const handleAdd = () => {
     const now = new Date().toISOString();
@@ -41,6 +43,7 @@ const EditorContent = () => {
       StyleSheet.create({
         container: {
           padding: 24,
+          paddingTop: insets.top + 24,
           gap: 16,
           backgroundColor: theme.colors.background,
         },
@@ -103,7 +106,7 @@ const EditorContent = () => {
           fontSize: 12,
         },
       }),
-    [theme],
+    [theme, insets],
   );
 
   return (

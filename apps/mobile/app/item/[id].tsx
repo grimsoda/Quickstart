@@ -1,5 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { useMemo, useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import type { MenuItem, Mode } from "@quickstart/shared";
 import { useAppContext } from "../../data/app-context";
@@ -17,6 +18,7 @@ const ItemDetailContent = () => {
   const { theme } = useThemeContext();
   const { items, updateItem } = useAppContext();
   const { id } = useLocalSearchParams<{ id: string }>();
+  const insets = useSafeAreaInsets();
 
   const item = items.find((i: MenuItem) => i.id === id);
   const [localItem, setLocalItem] = useState<MenuItem | null>(item || null);
@@ -37,6 +39,7 @@ const ItemDetailContent = () => {
       StyleSheet.create({
         container: {
           padding: 24,
+          paddingTop: insets.top + 24,
           gap: 16,
           backgroundColor: theme.colors.background,
         },
@@ -112,7 +115,7 @@ const ItemDetailContent = () => {
           fontWeight: "600",
         },
       }),
-    [theme],
+    [theme, insets],
   );
 
   if (!item) {

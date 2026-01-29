@@ -2,6 +2,7 @@ import { Alert, Pressable, SectionList, StyleSheet, Text, TextInput, View } from
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import { useMemo, useState } from "react";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppContext } from "../data/app-context";
 import { useThemeContext } from "../data/theme-context";
 
@@ -111,6 +112,7 @@ const CategoryList = ({ items, categories, styles, theme, updateCategories, dele
 const SettingsContent = () => {
   const { mode, theme, setMode } = useThemeContext();
   const { preferences, updatePreferences, items, categories, updateCategories, deleteCategory } = useAppContext();
+  const insets = useSafeAreaInsets();
 
   const styles = useMemo(
     () =>
@@ -118,6 +120,7 @@ const SettingsContent = () => {
         container: {
           backgroundColor: theme.colors.background,
           padding: 24,
+          paddingTop: insets.top + 24,
         },
         title: {
           fontSize: 24,
@@ -277,7 +280,7 @@ const SettingsContent = () => {
           fontSize: 16,
         },
       }),
-    [theme],
+    [theme, insets],
   );
 
   const handleExport = async () => {
