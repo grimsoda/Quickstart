@@ -1,8 +1,8 @@
-import { Alert, Pressable, SectionList, StyleSheet, Text, TextInput, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAppContext } from "../data/app-context";
 import { useThemeContext } from "../data/theme-context";
@@ -18,6 +18,9 @@ type OrderingPreference = "duration" | "recent";
 
 const CategoryList = ({ items, categories, styles, theme, updateCategories, deleteCategory }: { items: any[]; categories: string[]; styles: ReturnType<typeof StyleSheet.create>; theme: any; updateCategories: (categories: string[]) => void; deleteCategory: (categoryName: string) => void }) => {
   const [newCategory, setNewCategory] = useState("");
+  const [editingCategory, setEditingCategory] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState("");
+  const inputRef = useRef<TextInput>(null);
 
   const handleAddCategory = () => {
     if (newCategory.trim() && !categories.includes(newCategory.trim())) {
@@ -27,28 +30,22 @@ const CategoryList = ({ items, categories, styles, theme, updateCategories, dele
   };
 
   const handleEditCategory = (categoryName: string) => {
-    Alert.prompt(
-      "Edit Category",
-      "Enter new category name:",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Save",
-          onPress: (newName: string | undefined) => {
-            if (newName && newName.trim()) {
-              const index = categories.indexOf(categoryName);
-              if (index !== -1) {
-                const updatedCategories = [...categories];
-                updatedCategories[index] = newName.trim();
-                updateCategories(updatedCategories);
-              }
-            }
-          },
-        },
-      ],
-      "plain-text",
-      categoryName
-    );
+    setEditingCategory(categoryName);
+    setEditValue(categoryName);
+    // Focus input after render
+    setTimeout(() => inputRef.current?.focus(), 100);
+  };
+
+  const handleSaveEdit = () => {
+    if (editingCategory && editValue.trim()) {
+      const index = categories.indexOf(editingCategory);
+      if (index !== -1) {
+        const updatedCategories = [...categories];
+        updatedCategories[index] = editValue.trim();
+        updateCategories(updatedCategories);
+      }
+    }
+    setEditingCategory(null);
   };
 
   const handleDeleteCategory = (categoryName: string) => {
@@ -69,8 +66,12 @@ const CategoryList = ({ items, categories, styles, theme, updateCategories, dele
   };
 
   return (
-    <View>
-      <View style={styles.categoryInputRow}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={{ flex: 1 }}
+    >
+      <View>
+        <View style={styles.categoryInputRow}>
         <TextInput
           style={styles.categoryInput}
           value={newCategory}
@@ -85,7 +86,19 @@ const CategoryList = ({ items, categories, styles, theme, updateCategories, dele
       <View style={styles.categoryList}>
         {categories.map((category) => (
           <View key={category} style={styles.categoryItem}>
-            <Text style={styles.categoryName}>{category}</Text>
+            {editingCategory === category ? (
+              <TextInput
+                ref={inputRef}
+                style={styles.editInput}
+                value={editValue}
+                onChangeText={setEditValue}
+                onBlur={handleSaveEdit}
+                onSubmitEditing={handleSaveEdit}
+                autoFocus
+              />
+            ) : (
+              <Text style={styles.categoryName}>{category}</Text>
+            )}
             <View style={styles.categoryActions}>
               <Pressable
                 style={styles.editButton}
@@ -106,7 +119,8 @@ const CategoryList = ({ items, categories, styles, theme, updateCategories, dele
           <Text style={styles.emptyText}>No categories yet. Add one above.</Text>
         )}
       </View>
-    </View>
+      </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -285,6 +299,15 @@ const SettingsContent = () => {
           fontWeight: "600",
           fontSize: 16,
         },
+        editInput: {
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          borderRadius: 8,
+          paddingVertical: 8,
+          paddingHorizontal: 12,
+          color: theme.colors.text,
+          backgroundColor: theme.colors.card,
+        },
       }),
     [theme, insets],
   );
@@ -432,15 +455,16 @@ const SettingsContent = () => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Settings</Text>
-      <SectionList
-        sections={sections}
-        renderItem={renderItem}
-        renderSectionHeader={({ section: { title } }: { section: { title: string } }) => (
-          <Text style={styles.sectionHeader}>{title}</Text>
-        )}
-        keyExtractor={(item, index) => `${item}-${index}`}
-        scrollEnabled={false}
-      />
+      <ScrollView contentContainerStyle={styles.container}>
+        {sections.map((section) => (
+          <View key={section.title}>
+            <Text style={styles.sectionHeader}>{section.title}</Text>
+            {section.data.map((item: any) => (
+              renderItem({ item, section })
+            ))}
+          </View>
+        ))}
+      </ScrollView>
     </View>
   );
 };
