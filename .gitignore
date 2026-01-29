@@ -37,6 +37,9 @@ apps/mobile/targets/widget/generated.entitlements
 # temporary files
 tmp/
 
+# test files (prevent Metro bundler from processing)
+apps/mobile/app/*.test.tsx
+
 # Sisyphus workflow state
 .sisyphus/
  
