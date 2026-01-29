@@ -7,12 +7,18 @@ import {
 import type { StorageSnapshot } from "@quickstart/storage";
 
 const STORAGE_KEY = "quickstart.snapshot.v1";
+const CATEGORIES_KEY = "quickstart.categories.v1";
 
-let memorySnapshot: StorageSnapshot | null = null;
+export const loadSnapshot = async (): Promise<StorageSnapshot> => {
+  try {
+    const AsyncStorage = await import("@react-native-async-storage/async-storage");
+    const stored = await AsyncStorage.default.getItem(STORAGE_KEY);
 
-export const loadSnapshot = (): StorageSnapshot => {
-  if (memorySnapshot) {
-    return memorySnapshot;
+    if (stored) {
+      return JSON.parse(stored) as StorageSnapshot;
+    }
+  } catch (error) {
+    console.error("Failed to load snapshot from AsyncStorage:", error);
   }
 
   return {
@@ -23,8 +29,37 @@ export const loadSnapshot = (): StorageSnapshot => {
   };
 };
 
-export const saveSnapshot = (snapshot: StorageSnapshot) => {
-  memorySnapshot = snapshot;
+export const saveSnapshot = async (snapshot: StorageSnapshot): Promise<void> => {
+  try {
+    const AsyncStorage = await import("@react-native-async-storage/async-storage");
+    await AsyncStorage.default.setItem(STORAGE_KEY, JSON.stringify(snapshot));
+  } catch (error) {
+    console.error("Failed to save snapshot to AsyncStorage:", error);
+  }
+};
+
+export const loadCategories = async (): Promise<string[]> => {
+  try {
+    const AsyncStorage = await import("@react-native-async-storage/async-storage");
+    const stored = await AsyncStorage.default.getItem(CATEGORIES_KEY);
+
+    if (stored) {
+      return JSON.parse(stored) as string[];
+    }
+  } catch (error) {
+    console.error("Failed to load categories from AsyncStorage:", error);
+  }
+
+  return [];
+};
+
+export const saveCategories = async (categories: string[]): Promise<void> => {
+  try {
+    const AsyncStorage = await import("@react-native-async-storage/async-storage");
+    await AsyncStorage.default.setItem(CATEGORIES_KEY, JSON.stringify(categories));
+  } catch (error) {
+    console.error("Failed to save categories to AsyncStorage:", error);
+  }
 };
 
 export type ThemeMode = "light" | "dark" | "system";

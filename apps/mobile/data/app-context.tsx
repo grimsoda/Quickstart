@@ -1,13 +1,20 @@
 import type { ReactNode } from "react";
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import type { Mode, Preference, Session } from "@quickstart/shared";
 import type { StorageSnapshot } from "@quickstart/storage";
-import { loadSnapshot, saveSnapshot } from "./storage";
+import {
+  defaultItems,
+  defaultPreferences,
+  defaultRules,
+  defaultSessions,
+} from "@quickstart/storage";
+import { loadCategories, loadSnapshot, saveCategories, saveSnapshot } from "./storage";
 
 type AppState = StorageSnapshot & {
   mode: Mode;
   activeDecisionId?: string;
   categories: string[];
+  isLoading: boolean;
 };
 
 type AppActions = {
@@ -25,17 +32,37 @@ type AppActions = {
 
 const AppContext = createContext<(AppState & AppActions) | null>(null);
 
-const initialSnapshot = loadSnapshot();
+const defaultSnapshot: StorageSnapshot = {
+  items: defaultItems,
+  rules: defaultRules,
+  sessions: defaultSessions,
+  preferences: defaultPreferences,
+};
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
-  const [snapshot, setSnapshot] = useState<StorageSnapshot>(initialSnapshot);
+  const [snapshot, setSnapshot] = useState<StorageSnapshot>(defaultSnapshot);
   const [mode, setMode] = useState<Mode>("do");
   const [activeDecisionId, setActiveDecisionId] = useState<string | undefined>();
   const [categories, setCategories] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const persist = (next: StorageSnapshot) => {
+  useEffect(() => {
+    const loadInitialData = async () => {
+      const [loadedSnapshot, loadedCategories] = await Promise.all([
+        loadSnapshot(),
+        loadCategories(),
+      ]);
+      setSnapshot(loadedSnapshot);
+      setCategories(loadedCategories);
+      setIsLoading(false);
+    };
+
+    loadInitialData();
+  }, []);
+
+  const persist = async (next: StorageSnapshot) => {
     setSnapshot(next);
-    saveSnapshot(next);
+    await saveSnapshot(next);
   };
 
   const actions: AppActions = useMemo(
@@ -70,9 +97,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       },
       updateCategories: (newCategories: string[]) => {
         setCategories(newCategories);
+        saveCategories(newCategories);
       },
       deleteCategory: (categoryName: string) => {
-        setCategories(categories.filter((cat) => cat !== categoryName));
+        const newCategories = categories.filter((cat) => cat !== categoryName);
+        setCategories(newCategories);
+        saveCategories(newCategories);
         persist({
           ...snapshot,
           items: snapshot.items.map((item) =>
@@ -90,9 +120,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       mode,
       activeDecisionId,
       categories,
+      isLoading,
       ...actions,
     }),
-    [actions, activeDecisionId, categories, mode, snapshot],
+    [actions, activeDecisionId, categories, isLoading, mode, snapshot],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
