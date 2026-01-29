@@ -62,10 +62,27 @@ const HomeContent = () => {
       StyleSheet.create({
         container: {
           padding: 24,
-          paddingTop: insets.top + 24,
-          gap: 16,
           backgroundColor: theme.colors.background,
+          flex: 1,
         },
+        header: {
+          paddingTop: insets.top,
+          gap: 16,
+        },
+        title: {
+          fontSize: 28,
+          fontWeight: "700",
+          color: theme.colors.text,
+        },
+        sectionTitle: {
+          fontSize: 18,
+          fontWeight: "600",
+          color: theme.colors.text,
+        },
+        // ... other existing styles
+      },
+      }),
+    [theme, insets]);
         title: {
           fontSize: 28,
           fontWeight: "700",
