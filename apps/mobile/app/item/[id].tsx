@@ -17,11 +17,12 @@ const cycleValue = <T,>(values: T[], current: T) => {
 
 const ItemDetailContent = () => {
   const { theme } = useThemeContext();
-  const { items, updateItem, deleteItem } = useAppContext();
+  const { items, updateItem, deleteItem, categories } = useAppContext();
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
 
   const item = items.find((i: MenuItem) => i.id === id);
+  const isNewItem = !item;
   const [localItem, setLocalItem] = useState<MenuItem | null>(item || null);
 
   const handleSave = () => {
@@ -112,6 +113,7 @@ const ItemDetailContent = () => {
           borderRadius: 8,
           paddingVertical: 6,
           paddingHorizontal: 12,
+          height: 50,
         },
         chipText: {
           color: theme.colors.text,
@@ -171,7 +173,7 @@ const ItemDetailContent = () => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.title}>Edit Item</Text>
+      <Text style={styles.title}>{isNewItem ? "Add Item" : "Edit Item"}</Text>
       <View style={styles.card}>
         <View>
           <Text style={styles.label}>Title</Text>
@@ -262,22 +264,46 @@ const ItemDetailContent = () => {
 
         <View>
           <Text style={styles.label}>Tags</Text>
-          <TextInput
-            value={localItem?.tags.join(", ") || ""}
-            placeholder="Tags (comma-separated)"
-            placeholderTextColor={theme.colors.text}
-            onChangeText={(text) =>
-              setLocalItem((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      tags: text.split(",").map((tag) => tag.trim()).filter(Boolean),
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={styles.row}>
+              {categories.map((category) => {
+                const isSelected = localItem?.tags.includes(category) ?? false;
+                return (
+                  <Pressable
+                    key={category}
+                    onPress={() =>
+                      setLocalItem((prev) =>
+                        prev
+                          ? {
+                              ...prev,
+                              tags: isSelected
+                                ? prev.tags.filter((t) => t !== category)
+                                : [...prev.tags, category],
+                            }
+                          : null
+                      )
                     }
-                  : null
-              )
-            }
-            style={styles.input}
-          />
+                    style={[
+                      styles.chip,
+                      isSelected && {
+                        backgroundColor: theme.colors.text,
+                        borderColor: theme.colors.text,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.chipText,
+                        isSelected && { color: theme.colors.background },
+                      ]}
+                    >
+                      {category}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </ScrollView>
         </View>
 
         <View style={styles.buttonRow}>
