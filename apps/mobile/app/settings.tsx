@@ -1,4 +1,5 @@
 import { Alert, Pressable, SectionList, StyleSheet, Text, TextInput, View } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import { useMemo, useState } from "react";
@@ -129,11 +130,16 @@ const SettingsContent = () => {
           marginBottom: 24,
         },
         sectionHeader: {
-          fontSize: 13,
+          fontSize: 18,
           fontWeight: "600",
           color: theme.colors.text,
           marginBottom: 8,
-          marginTop: 24,
+        },
+        picker: {
+          backgroundColor: theme.colors.card,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          borderRadius: 8,
         },
         sectionContent: {
           marginBottom: 24,
@@ -377,27 +383,14 @@ const SettingsContent = () => {
     if (section.title === "ORDERING" && item === "ordering") {
       return (
         <View style={styles.sectionContent}>
-          <View style={styles.segmentedControl}>
-            {orderingOptions.map((ordering) => (
-              <Pressable
-                key={ordering}
-                style={[
-                  styles.segment,
-                  preferences.ordering === ordering ? styles.segmentActive : null,
-                ]}
-                onPress={() => updatePreferences({ ...preferences, ordering })}
-              >
-                <Text
-                  style={[
-                    styles.segmentText,
-                    preferences.ordering === ordering ? styles.segmentTextActive : null,
-                  ]}
-                >
-                  {ordering.charAt(0).toUpperCase() + ordering.slice(1)}
-                </Text>
-              </Pressable>
-            ))}
-          </View>
+          <Picker
+            selectedValue={preferences.ordering}
+            onValueChange={(value) => updatePreferences({ ...preferences, ordering: value })}
+            style={styles.picker}
+          >
+            <Picker.Item label="Duration" value="duration" />
+            <Picker.Item label="Recent" value="recent" />
+          </Picker>
         </View>
       );
     }
