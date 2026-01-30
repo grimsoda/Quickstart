@@ -223,8 +223,7 @@ const HomeContent = () => {
           </View>
         </View>
       </View>
-      <ScrollView>
-        <Text style={styles.sectionTitle}>Menu</Text>
+      <ScrollView style={{ paddingTop: 16 }}>
         {selection.length === 0 ? (
           <Text style={styles.emptyState}>Add items from the web editor to get started.</Text>
         ) : (
