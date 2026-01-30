@@ -27,6 +27,10 @@ const ItemDetailContent = () => {
 
   const handleSave = () => {
     if (localItem) {
+      if (!localItem.title || localItem.title.trim() === "") {
+        Alert.alert("Error", "Title is required");
+        return;
+      }
       updateItem(localItem);
       router.back();
     }
@@ -111,9 +115,7 @@ const ItemDetailContent = () => {
           borderWidth: 1,
           borderColor: theme.colors.border,
           borderRadius: 8,
-          paddingVertical: 6,
-          paddingHorizontal: 12,
-          height: 50,
+          width: 200,
         },
         chipText: {
           color: theme.colors.text,

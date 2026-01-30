@@ -208,18 +208,22 @@ const HomeContent = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Quickstart</Text>
-      <Text style={styles.subtitle}>Do · Decide · Drift</Text>
-      <ScrollView>
+      <View style={styles.header}>
+        <Text style={styles.title}>Quickstart</Text>
+        <Text style={styles.subtitle}>Do · Decide · Drift</Text>
         <View style={styles.headerRow}>
           <ModeHeader mode={mode} onSelect={setMode} styles={styles} />
-          <Pressable onPress={handleAddItem} style={styles.settingsButton}>
-            <Text style={styles.settingsText}>+ Add</Text>
-          </Pressable>
-          <Pressable onPress={() => router.push("/settings")} style={styles.settingsButton}>
-            <Text style={styles.settingsText}>Settings</Text>
-          </Pressable>
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            <Pressable onPress={handleAddItem} style={styles.settingsButton}>
+              <Text style={styles.settingsText}>+ Add</Text>
+            </Pressable>
+            <Pressable onPress={() => router.push("/settings")} style={styles.settingsButton}>
+              <Text style={styles.settingsText}>Settings</Text>
+            </Pressable>
+          </View>
         </View>
+      </View>
+      <ScrollView>
         <Text style={styles.sectionTitle}>Menu</Text>
         {selection.length === 0 ? (
           <Text style={styles.emptyState}>Add items from the web editor to get started.</Text>
