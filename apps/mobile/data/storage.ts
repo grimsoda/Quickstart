@@ -15,7 +15,17 @@ export const loadSnapshot = async (): Promise<StorageSnapshot> => {
     const stored = await AsyncStorage.default.getItem(STORAGE_KEY);
 
     if (stored) {
-      return JSON.parse(stored) as StorageSnapshot;
+      const parsed = JSON.parse(stored) as Partial<StorageSnapshot>;
+      // Merge with defaults to ensure all fields exist (handles schema migrations)
+      return {
+        items: parsed.items ?? defaultItems,
+        rules: parsed.rules ?? defaultRules,
+        sessions: parsed.sessions ?? defaultSessions,
+        preferences: {
+          ...defaultPreferences,
+          ...parsed.preferences,
+        },
+      };
     }
   } catch (error) {
     console.error("Failed to load snapshot from AsyncStorage:", error);
