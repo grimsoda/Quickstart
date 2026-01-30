@@ -39,7 +39,20 @@ const MenuList = ({ items, router, styles }: { items: MenuItem[]; router: Return
           <Text style={styles.cardTitle}>{item.title}</Text>
           <Text style={styles.cardSubtitle}>{item.startStep}</Text>
           <View style={styles.cardRow}>
-            <Text style={styles.badge}>{item.durationBucket}</Text>
+            <View style={styles.chipsContainer}>
+              <Text style={styles.badge}>{item.durationBucket}</Text>
+              {item.tags && item.tags.length > 0 && (
+                <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.tagsScroll}>
+                  <View style={styles.tagsRow}>
+                    {item.tags.map((tag) => (
+                      <View key={tag} style={styles.tagChip}>
+                        <Text style={styles.tagChipText}>{tag}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </ScrollView>
+              )}
+            </View>
             <Pressable onPress={() => router.push(`/item/${item.id}`)} style={styles.primaryButton}>
               <Text style={styles.primaryButtonText}>Edit</Text>
             </Pressable>
@@ -150,12 +163,37 @@ const HomeContent = () => {
           justifyContent: "space-between",
         },
         badge: {
-          backgroundColor: theme.colors.border,
+          backgroundColor: theme.colors.primary,
           paddingHorizontal: 8,
           paddingVertical: 4,
           borderRadius: 999,
           fontSize: 12,
+          color: theme.colors.background,
+        },
+        chipsContainer: {
+          flexDirection: "row",
+          alignItems: "center",
+          flex: 1,
+          gap: 8,
+        },
+        tagsScroll: {
+          flex: 1,
+        },
+        tagsRow: {
+          flexDirection: "row",
+          gap: 6,
+        },
+        tagChip: {
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          borderRadius: 999,
+          paddingVertical: 4,
+          paddingHorizontal: 8,
+          backgroundColor: theme.colors.card,
+        },
+        tagChipText: {
           color: theme.colors.text,
+          fontSize: 12,
         },
         primaryButton: {
           paddingHorizontal: 12,
