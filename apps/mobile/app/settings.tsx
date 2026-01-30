@@ -146,14 +146,14 @@ const SettingsContent = () => {
         },
         backButton: {
           paddingVertical: 8,
-          paddingHorizontal: 12,
+          paddingHorizontal: 10,
           borderRadius: 8,
           borderWidth: 1,
           borderColor: theme.colors.border,
           backgroundColor: theme.colors.card,
         },
         backButtonText: {
-          fontSize: 16,
+          fontSize: 18,
           color: theme.colors.text,
           fontWeight: "600",
         },
@@ -488,7 +488,7 @@ const SettingsContent = () => {
     <View style={styles.container}>
       <View style={styles.headerRow}>
         <Pressable style={styles.backButton} onPress={() => router.back()}>
-          <Text style={styles.backButtonText}>← Back</Text>
+          <Text style={styles.backButtonText}>←</Text>
         </Pressable>
         <Text style={styles.title}>Settings</Text>
       </View>
