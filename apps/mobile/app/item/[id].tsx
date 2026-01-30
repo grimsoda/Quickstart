@@ -83,6 +83,24 @@ const ItemDetailContent = () => {
           gap: 16,
           backgroundColor: theme.colors.background,
         },
+        headerRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 12,
+        },
+        backButton: {
+          paddingVertical: 8,
+          paddingHorizontal: 12,
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          backgroundColor: theme.colors.card,
+        },
+        backButtonText: {
+          fontSize: 16,
+          color: theme.colors.text,
+          fontWeight: "600",
+        },
         title: {
           fontSize: 24,
           fontWeight: "700",
@@ -184,7 +202,12 @@ const ItemDetailContent = () => {
       style={{ flex: 1 }}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>{isNewItem ? "Add Item" : "Edit Item"}</Text>
+        <View style={styles.headerRow}>
+          <Pressable style={styles.backButton} onPress={() => router.back()}>
+            <Text style={styles.backButtonText}>← Back</Text>
+          </Pressable>
+          <Text style={styles.title}>{isNewItem ? "Add Item" : "Edit Item"}</Text>
+        </View>
       <View style={styles.card}>
         <View>
           <Text style={styles.label}>Title</Text>

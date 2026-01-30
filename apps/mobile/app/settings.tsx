@@ -4,6 +4,7 @@ import * as Sharing from "expo-sharing";
 import * as DocumentPicker from "expo-document-picker";
 import { useMemo, useRef, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { router } from "expo-router";
 import { useAppContext } from "../data/app-context";
 import { useThemeContext } from "../data/theme-context";
 
@@ -137,11 +138,29 @@ const SettingsContent = () => {
           padding: 24,
           paddingTop: insets.top + 24,
         },
+        headerRow: {
+          flexDirection: "row",
+          alignItems: "center",
+          gap: 12,
+          marginBottom: 24,
+        },
+        backButton: {
+          paddingVertical: 8,
+          paddingHorizontal: 12,
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: theme.colors.border,
+          backgroundColor: theme.colors.card,
+        },
+        backButtonText: {
+          fontSize: 16,
+          color: theme.colors.text,
+          fontWeight: "600",
+        },
         title: {
           fontSize: 24,
           fontWeight: "700",
           color: theme.colors.text,
-          marginBottom: 24,
         },
         sectionHeader: {
           fontSize: 18,
@@ -467,7 +486,12 @@ const SettingsContent = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Settings</Text>
+      <View style={styles.headerRow}>
+        <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Text style={styles.backButtonText}>← Back</Text>
+        </Pressable>
+        <Text style={styles.title}>Settings</Text>
+      </View>
       <ScrollView style={{ flex: 1 }}>
         {sections.map((section) => (
           <View key={section.title}>
