@@ -1,11 +1,10 @@
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import type { MenuItem, Mode } from "@quickstart/shared";
 import { useAppContext } from "../../data/app-context";
 import { useThemeContext } from "../../data/theme-context";
-import { Picker } from "@react-native-picker/picker";
 
 const durationBuckets: MenuItem["durationBucket"][] = ["2m", "10m", "25m"];
 const modes: Mode[] = ["do", "decide", "drift"];
@@ -24,6 +23,18 @@ const ItemDetailContent = () => {
   const item = items.find((i: MenuItem) => i.id === id);
   const isNewItem = !item;
   const [localItem, setLocalItem] = useState<MenuItem | null>(item || null);
+
+  // Set default values for duration and mode if not set
+  useEffect(() => {
+    setLocalItem((prev) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        durationBucket: prev.durationBucket ?? durationBuckets[0],
+        mode: prev.mode ?? modes[0],
+      };
+    });
+  }, []);
 
   const handleSave = () => {
     if (localItem) {
@@ -109,13 +120,6 @@ const ItemDetailContent = () => {
           borderRadius: 999,
           paddingVertical: 6,
           paddingHorizontal: 12,
-        },
-        picker: {
-          backgroundColor: theme.colors.card,
-          borderWidth: 1,
-          borderColor: theme.colors.border,
-          borderRadius: 8,
-          width: 200,
         },
         chipText: {
           color: theme.colors.text,
@@ -211,26 +215,42 @@ const ItemDetailContent = () => {
 
         <View>
           <Text style={styles.label}>Duration</Text>
-          <View style={styles.row}>
-            <Picker
-              selectedValue={localItem?.durationBucket}
-              onValueChange={(value) =>
-                setLocalItem((prev) =>
-                  prev
-                    ? {
-                        ...prev,
-                        durationBucket: value as MenuItem["durationBucket"],
-                      }
-                    : null
-                )
-              }
-              style={styles.picker}
-            >
-              <Picker.Item label="2 minutes" value="2m" />
-              <Picker.Item label="10 minutes" value="10m" />
-              <Picker.Item label="25 minutes" value="25m" />
-            </Picker>
-          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={styles.row}>
+              {durationBuckets.map((bucket) => {
+                const isSelected = localItem?.durationBucket === bucket;
+                const displayLabel = bucket === "2m" ? "2 min" : bucket === "10m" ? "10 min" : "25 min";
+                return (
+                  <Pressable
+                    key={bucket}
+                    onPress={() =>
+                      setLocalItem((prev) =>
+                        prev
+                          ? { ...prev, durationBucket: bucket }
+                          : null
+                      )
+                    }
+                    style={[
+                      styles.chip,
+                      isSelected && {
+                        backgroundColor: theme.colors.text,
+                        borderColor: theme.colors.text,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.chipText,
+                        isSelected && { color: theme.colors.background },
+                      ]}
+                    >
+                      {displayLabel}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </ScrollView>
         </View>
 
         <View>
@@ -250,23 +270,42 @@ const ItemDetailContent = () => {
 
         <View>
           <Text style={styles.label}>Mode</Text>
-          <View style={styles.row}>
-            <Picker
-              selectedValue={localItem?.mode}
-              onValueChange={(value) =>
-                setLocalItem((prev) =>
-                  prev
-                    ? { ...prev, mode: value as Mode }
-                    : null
-                )
-              }
-              style={styles.picker}
-            >
-              <Picker.Item label="Do" value="do" />
-              <Picker.Item label="Decide" value="decide" />
-              <Picker.Item label="Drift" value="drift" />
-            </Picker>
-          </View>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+            <View style={styles.row}>
+              {modes.map((mode) => {
+                const isSelected = localItem?.mode === mode;
+                const displayLabel = mode.charAt(0).toUpperCase() + mode.slice(1);
+                return (
+                  <Pressable
+                    key={mode}
+                    onPress={() =>
+                      setLocalItem((prev) =>
+                        prev
+                          ? { ...prev, mode: mode }
+                          : null
+                      )
+                    }
+                    style={[
+                      styles.chip,
+                      isSelected && {
+                        backgroundColor: theme.colors.text,
+                        borderColor: theme.colors.text,
+                      },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.chipText,
+                        isSelected && { color: theme.colors.background },
+                      ]}
+                    >
+                      {displayLabel}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          </ScrollView>
         </View>
 
         <View>
