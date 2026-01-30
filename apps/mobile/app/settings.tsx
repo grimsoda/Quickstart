@@ -406,14 +406,27 @@ const SettingsContent = () => {
     if (section.title === "ORDERING" && item === "ordering") {
       return (
         <View style={styles.sectionContent}>
-          <Picker
-            selectedValue={preferences.ordering}
-            onValueChange={(value) => updatePreferences({ ...preferences, ordering: value })}
-            style={styles.picker}
-          >
-            <Picker.Item label="Duration" value="duration" />
-            <Picker.Item label="Recent" value="recent" />
-          </Picker>
+          <View style={styles.segmentedControl}>
+            {orderingOptions.map((option) => (
+              <Pressable
+                key={option}
+                style={[
+                  styles.segment,
+                  preferences.ordering === option ? styles.segmentActive : null,
+                ]}
+                onPress={() => updatePreferences({ ...preferences, ordering: option })}
+              >
+                <Text
+                  style={[
+                    styles.segmentText,
+                    preferences.ordering === option ? styles.segmentTextActive : null,
+                  ]}
+                >
+                  {option.charAt(0).toUpperCase() + option.slice(1)}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
         </View>
       );
     }
