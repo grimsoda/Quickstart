@@ -116,7 +116,7 @@ const CategoryList = ({ items, categories, styles, theme, updateCategories, dele
           </View>
         ))}
         {categories.length === 0 && (
-          <Text style={styles.emptyText}>No categories yet. Add one above.</Text>
+          <Text style={styles.emptyText}>No tags yet. Add one above.</Text>
         )}
       </View>
       </View>
@@ -365,7 +365,7 @@ const SettingsContent = () => {
       data: ["ordering"],
     },
     {
-      title: "CATEGORIES",
+      title: "TAGS",
       data: ["categories-placeholder"],
     },
     {
@@ -418,7 +418,7 @@ const SettingsContent = () => {
       );
     }
 
-    if (section.title === "CATEGORIES" && item === "categories-placeholder") {
+    if (section.title === "TAGS" && item === "categories-placeholder") {
       return (
         <View style={styles.sectionContent}>
           <CategoryList items={items} categories={categories} styles={styles} theme={theme} updateCategories={updateCategories} deleteCategory={deleteCategory} />
