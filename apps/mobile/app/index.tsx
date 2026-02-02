@@ -65,7 +65,7 @@ const MenuList = ({ items, router, styles }: { items: MenuItem[]; router: Return
 
 const HomeContent = () => {
   const { theme } = useThemeContext();
-  const { mode, setMode, items, preferences, addSession, addItem } = useAppContext();
+  const { mode, setMode, items, preferences } = useAppContext();
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const selection = selectMenuItems(items, mode, preferences);
@@ -210,21 +210,7 @@ const HomeContent = () => {
   );
 
   const handleAddItem = () => {
-    const newItem: MenuItem = {
-      id: `item-${Date.now()}`,
-      mode: "do" as Mode,
-      title: "",
-      startStep: "",
-      durationBucket: "2m" as MenuItem["durationBucket"],
-      category: null,
-      tags: [],
-      frictionScore: 1,
-      enabled: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    addItem(newItem);
-    router.push(`/item/${newItem.id}`);
+    router.push("/item/new");
   };
 
   console.log("[Quickstart App] HomeContent rendered");
