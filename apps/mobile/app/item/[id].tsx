@@ -1,5 +1,5 @@
 import { Alert, KeyboardAvoidingView, Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLocalSearchParams, router } from "expo-router";
 import type { MenuItem, Mode } from "@quickstart/shared";
@@ -9,32 +9,70 @@ import { useThemeContext } from "../../data/theme-context";
 const durationBuckets: MenuItem["durationBucket"][] = ["2m", "10m", "25m"];
 const modes: Mode[] = ["do", "decide", "drift"];
 
-const cycleValue = <T,>(values: T[], current: T) => {
-  const index = values.indexOf(current);
-  return values[(index + 1) % values.length] ?? values[0];
-};
+const createDefaultItem = (): MenuItem => ({
+  id: `item-${Date.now()}`,
+  mode: "do" as Mode,
+  title: "",
+  startStep: "",
+  durationBucket: "2m" as MenuItem["durationBucket"],
+  category: null,
+  tags: [],
+  frictionScore: 1,
+  enabled: true,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+});
 
 const ItemDetailContent = () => {
   const { theme } = useThemeContext();
-  const { items, updateItem, deleteItem, categories } = useAppContext();
+  const { items, updateItem, deleteItem, addItem, categories } = useAppContext();
   const { id } = useLocalSearchParams<{ id: string }>();
   const insets = useSafeAreaInsets();
 
-  const item = items.find((i: MenuItem) => i.id === id);
-  const isNewItem = !item;
-  const [localItem, setLocalItem] = useState<MenuItem | null>(item || null);
+  const isNewMode = id === "new";
+  const existingItem = !isNewMode ? items.find((i: MenuItem) => i.id === id) : null;
+  const isEditMode = !isNewMode && !!existingItem;
 
-  // Set default values for duration and mode if not set
+  const [localItem, setLocalItem] = useState<MenuItem | null>(null);
+  const [originalItem, setOriginalItem] = useState<MenuItem | null>(null);
+
   useEffect(() => {
-    setLocalItem((prev) => {
-      if (!prev) return null;
-      return {
-        ...prev,
-        durationBucket: prev.durationBucket ?? durationBuckets[0],
-        mode: prev.mode ?? modes[0],
+    if (isNewMode) {
+      const defaultItem = createDefaultItem();
+      setLocalItem(defaultItem);
+      setOriginalItem({ ...defaultItem });
+    } else if (existingItem) {
+      const itemWithDefaults = {
+        ...existingItem,
+        durationBucket: existingItem.durationBucket ?? durationBuckets[0],
+        mode: existingItem.mode ?? modes[0],
       };
-    });
-  }, []);
+      setLocalItem(itemWithDefaults);
+      setOriginalItem({ ...itemWithDefaults });
+    }
+  }, [isNewMode, existingItem]);
+
+  const hasUnsavedChanges = useCallback(() => {
+    if (!localItem || !originalItem) return false;
+    const titleChanged = localItem.title !== originalItem.title;
+    const descriptionChanged = localItem.startStep !== originalItem.startStep;
+    return titleChanged || descriptionChanged;
+  }, [localItem, originalItem]);
+
+  const confirmDiscardChanges = (onConfirm: () => void) => {
+    if (hasUnsavedChanges()) {
+      Alert.alert(
+        "Discard Changes?",
+        "You have unsaved changes. Are you sure you want to discard them?",
+        [
+          { text: "Cancel", style: "cancel" },
+          { text: "Discard", style: "destructive", onPress: onConfirm },
+        ]
+      );
+    } else {
+      onConfirm();
+    }
+  };
 
   const handleSave = () => {
     if (localItem) {
@@ -42,25 +80,34 @@ const ItemDetailContent = () => {
         Alert.alert("Error", "Title is required");
         return;
       }
-      updateItem(localItem);
+      if (isNewMode) {
+        addItem(localItem);
+      } else {
+        updateItem(localItem);
+      }
       router.back();
     }
   };
 
   const handleCancel = () => {
-    router.back();
+    confirmDiscardChanges(() => {
+      router.back();
+    });
+  };
+
+  const handleBack = () => {
+    confirmDiscardChanges(() => {
+      router.back();
+    });
   };
 
   const handleDelete = () => {
-    if (localItem) {
+    if (localItem && isEditMode) {
       Alert.alert(
         "Delete Item",
         "Are you sure you want to delete this item?",
         [
-          {
-            text: "Cancel",
-            style: "cancel",
-          },
+          { text: "Cancel", style: "cancel" },
           {
             text: "Delete",
             style: "destructive",
@@ -187,13 +234,23 @@ const ItemDetailContent = () => {
     [theme, insets],
   );
 
-  if (!item) {
+  if (!isNewMode && !existingItem) {
     return (
       <View style={styles.container}>
         <Text style={styles.title}>Item not found</Text>
       </View>
     );
   }
+
+  if (!localItem) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.title}>Loading...</Text>
+      </View>
+    );
+  }
+
+  const pageTitle = isNewMode ? "New Item" : "Edit Item";
 
   return (
     <KeyboardAvoidingView
@@ -203,16 +260,16 @@ const ItemDetailContent = () => {
     >
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.headerRow}>
-          <Pressable style={styles.backButton} onPress={() => router.back()}>
+          <Pressable style={styles.backButton} onPress={handleBack}>
             <Text style={styles.backButtonText}>←</Text>
           </Pressable>
-          <Text style={styles.title}>{isNewItem ? "Add Item" : "Edit Item"}</Text>
+          <Text style={styles.title}>{pageTitle}</Text>
         </View>
       <View style={styles.card}>
         <View>
           <Text style={styles.label}>Title</Text>
           <TextInput
-            value={localItem?.title || ""}
+            value={localItem.title || ""}
             placeholder="Title"
             placeholderTextColor={theme.colors.text}
             onChangeText={(text) =>
@@ -225,7 +282,7 @@ const ItemDetailContent = () => {
         <View>
           <Text style={styles.label}>Description</Text>
           <TextInput
-            value={localItem?.startStep || ""}
+            value={localItem.startStep || ""}
             placeholder="Description"
             placeholderTextColor={theme.colors.text}
             onChangeText={(text) =>
@@ -241,7 +298,7 @@ const ItemDetailContent = () => {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.row}>
               {durationBuckets.map((bucket) => {
-                const isSelected = localItem?.durationBucket === bucket;
+                const isSelected = localItem.durationBucket === bucket;
                 const displayLabel = bucket === "2m" ? "2 min" : bucket === "10m" ? "10 min" : "25 min";
                 return (
                   <Pressable
@@ -279,7 +336,7 @@ const ItemDetailContent = () => {
         <View>
           <Text style={styles.label}>Category</Text>
           <TextInput
-            value={localItem?.category || ""}
+            value={localItem.category || ""}
             placeholder="Category"
             placeholderTextColor={theme.colors.text}
             onChangeText={(text) =>
@@ -296,7 +353,7 @@ const ItemDetailContent = () => {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.row}>
               {modes.map((mode) => {
-                const isSelected = localItem?.mode === mode;
+                const isSelected = localItem.mode === mode;
                 const displayLabel = mode.charAt(0).toUpperCase() + mode.slice(1);
                 return (
                   <Pressable
@@ -336,7 +393,7 @@ const ItemDetailContent = () => {
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             <View style={styles.row}>
               {categories.map((category) => {
-                const isSelected = localItem?.tags.includes(category) ?? false;
+                const isSelected = localItem.tags.includes(category);
                 return (
                   <Pressable
                     key={category}
@@ -379,9 +436,11 @@ const ItemDetailContent = () => {
           <Pressable onPress={handleSave} style={styles.saveButton}>
             <Text style={styles.saveButtonText}>Save</Text>
           </Pressable>
-          <Pressable onPress={handleDelete} style={styles.deleteButton}>
-            <Text style={styles.deleteButtonText}>Delete</Text>
-          </Pressable>
+          {isEditMode && (
+            <Pressable onPress={handleDelete} style={styles.deleteButton}>
+              <Text style={styles.deleteButtonText}>Delete</Text>
+            </Pressable>
+          )}
           <Pressable onPress={handleCancel} style={styles.cancelButton}>
             <Text style={styles.cancelButtonText}>Cancel</Text>
           </Pressable>
