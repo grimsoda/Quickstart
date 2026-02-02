@@ -137,6 +137,7 @@ const SettingsContent = () => {
     () =>
       StyleSheet.create({
         container: {
+          flex: 1,
           backgroundColor: theme.colors.background,
           padding: 24,
           paddingTop: insets.top + 24,
