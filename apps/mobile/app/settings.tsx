@@ -127,8 +127,11 @@ const CategoryList = ({ items, categories, styles, theme, updateCategories, dele
 
 const SettingsContent = () => {
   const { mode, theme, setMode } = useThemeContext();
-  const { preferences, updatePreferences, items, categories, updateCategories, deleteCategory } = useAppContext();
+  const { preferences, updatePreferences, items, categories, updateCategories, deleteCategory, isLoading } = useAppContext();
   const insets = useSafeAreaInsets();
+
+  const safePreferences = preferences || { ordering: "duration" };
+  const safeCategories = categories || [];
 
   const styles = useMemo(
     () =>
@@ -431,14 +434,14 @@ const SettingsContent = () => {
                 key={option}
                 style={[
                   styles.segment,
-                  preferences.ordering === option ? styles.segmentActive : null,
+                  safePreferences.ordering === option ? styles.segmentActive : null,
                 ]}
-                onPress={() => updatePreferences({ ...preferences, ordering: option })}
+                onPress={() => updatePreferences({ ...safePreferences, ordering: option })}
               >
                 <Text
                   style={[
                     styles.segmentText,
-                    preferences.ordering === option ? styles.segmentTextActive : null,
+                    safePreferences.ordering === option ? styles.segmentTextActive : null,
                   ]}
                 >
                   {option.charAt(0).toUpperCase() + option.slice(1)}
@@ -453,7 +456,7 @@ const SettingsContent = () => {
     if (section.title === "TAGS" && item === "categories-placeholder") {
       return (
         <View style={styles.sectionContent}>
-          <CategoryList items={items} categories={categories} styles={styles} theme={theme} updateCategories={updateCategories} deleteCategory={deleteCategory} />
+          <CategoryList items={items} categories={safeCategories} styles={styles} theme={theme} updateCategories={updateCategories} deleteCategory={deleteCategory} />
         </View>
       );
     }
